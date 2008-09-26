@@ -402,7 +402,6 @@ static char *cpio_replace_env(char *new_location)
        return new_location;
 }
 
-
 static int cpio_mkfile_line(const char *line)
 {
 	char name[PATH_MAX + 1];
