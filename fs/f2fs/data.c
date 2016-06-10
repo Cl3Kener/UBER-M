@@ -1796,7 +1796,11 @@ static ssize_t f2fs_direct_IO(int rw, struct kiocb *iocb,
 #endif
 	int err;
 
+#ifdef CONFIG_AIO_OPTIMIZATION
+	err = check_direct_IO(inode, rw, iter, offset);
+#else
 	err = check_direct_IO(inode, rw, iov, offset, nr_segs);
+#endif
 	if (err)
 		return err;
 
