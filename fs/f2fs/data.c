@@ -1807,21 +1807,7 @@ static ssize_t f2fs_direct_IO(int rw, struct kiocb *iocb,
 	if (f2fs_encrypted_inode(inode) && S_ISREG(inode->i_mode))
 		return 0;
 
-#ifdef CONFIG_AIO_OPTIMIZATION
-	err = check_direct_IO(inode, rw, iter, offset);
-#else
-	err = check_direct_IO(inode, rw, iov, offset, nr_segs);
-#endif
-	if (err)
-		return err;
-
 	trace_f2fs_direct_IO_enter(inode, offset, count, rw);
-
-	if (rw & WRITE) {
-		err = __allocate_data_blocks(inode, offset, count);
-		if (err)
-			goto out;
-	}
 
 #ifdef CONFIG_AIO_OPTIMIZATION
 	err = blockdev_direct_IO(rw, iocb, inode, iter, offset,
@@ -1830,7 +1816,6 @@ static ssize_t f2fs_direct_IO(int rw, struct kiocb *iocb,
 	err = blockdev_direct_IO(rw, iocb, inode, iov, offset, nr_segs,
 							get_data_block_dio);
 #endif
-out:
 	if (err < 0 && (rw & WRITE)) {
 		if (err > 0)
 			set_inode_flag(F2FS_I(inode), FI_UPDATE_WRITE);
